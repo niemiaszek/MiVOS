@@ -12,10 +12,12 @@ from PIL import Image, ImageDraw, ImageFont
 
 import torch
 from torchvision import models
-from dataset.range_transform import im_normalization
+
+
 
 
 def images_to_torch(frames, device):
+    from dataset.range_transform import im_normalization
     frames = torch.from_numpy(frames.transpose(0, 3, 1, 2)).float().unsqueeze(0)/255
     b, t, c, h, w = frames.shape
     for ti in range(t):
@@ -30,8 +32,8 @@ def load_images(path, min_side=None):
     for i, fname in enumerate(fnames):
         if min_side:
             image = Image.open(fname).convert('RGB')
-            w, h = image.size
-            new_w = (w*min_side//min(w, h))
+            w, h = image.size # 480, 1920 1080
+            new_w = (w*min_side//min(w, h)) # 1920*480//1080
             new_h = (h*min_side//min(w, h))
             frame_list.append(np.array(image.resize((new_w, new_h), Image.BICUBIC), dtype=np.uint8))
         else:
@@ -116,7 +118,7 @@ color_map = [
 
 color_map_np = np.array(color_map)
 
-def overlay_davis(image, mask, alpha=0.5):
+def overlay_davis(image, mask, color_map_np=color_map_np, alpha=0.5):
     """ Overlay segmentation on top of RGB image. from davis official"""
     im_overlay = image.copy()
 
